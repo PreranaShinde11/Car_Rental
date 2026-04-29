@@ -7,14 +7,15 @@ const bookingRoutes = require("./routes/bookingRoutes");
 
 const app = express();
 
-// Middleware
-app.use(cors({
+// ✅ CORS config — must be defined BEFORE routes and options handler
+const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = [
       "http://localhost:5173",
       "https://safar-now-car-rental-website.vercel.app"
     ];
 
+    // Allow requests with no origin (e.g. curl, Postman, mobile apps)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -22,10 +23,17 @@ app.use(cors({
     }
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  credentials: true
-}));
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+  preflightContinue: false,
+  optionsSuccessStatus: 204  // Some browsers (IE11) choke on 204
+};
 
-app.options("*", cors());
+// ✅ Handle preflight OPTIONS requests FIRST, before any other middleware
+app.options("*", cors(corsOptions));
+
+// ✅ Apply CORS to all routes
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
@@ -48,7 +56,7 @@ app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
-// MongoDB + Server start (ONLY ONCE)
+// MongoDB + Server start
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log("✅ MongoDB Connected");
