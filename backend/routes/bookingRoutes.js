@@ -3,10 +3,18 @@ const router = express.Router();
 const Booking = require("../models/Booking");
 const nodemailer = require("nodemailer");
 
-router.get("/", (req, res) => {
-  res.send("Bookings API is working 🚀");
+// ✅ GET all bookings from MongoDB
+router.get("/", async (req, res) => {
+  try {
+    const bookings = await Booking.find();
+    res.json(bookings);
+  } catch (error) {
+    console.error("Error fetching bookings:", error);
+    res.status(500).json({ error: "Failed to fetch bookings" });
+  }
 });
 
+// ✅ CREATE booking + send email
 router.post("/", async (req, res) => {
   try {
     // Save booking to MongoDB
@@ -28,15 +36,15 @@ router.post("/", async (req, res) => {
       to: process.env.OWNER_EMAIL,
       subject: "New Car Booking Received",
       text: `
-        New Booking Details:
+New Booking Details:
 
-        Name: ${req.body.name}
-        Email: ${req.body.email}
-        Phone: ${req.body.phone}
-        Car: ${req.body.selectedCar}
-        Pickup Date: ${req.body.pickupDate}
-        Return Date: ${req.body.returnDate}
-        Location: ${req.body.location}
+Name: ${req.body.name}
+Email: ${req.body.email}
+Phone: ${req.body.phone}
+Car: ${req.body.selectedCar}
+Pickup Date: ${req.body.pickupDate}
+Return Date: ${req.body.returnDate}
+Location: ${req.body.location}
       `
     };
 
@@ -44,8 +52,9 @@ router.post("/", async (req, res) => {
     await transporter.sendMail(mailOptions);
 
     res.status(201).json({ message: "Booking saved and email sent!" });
+
   } catch (error) {
-    console.error(error);
+    console.error("Booking error:", error);
     res.status(500).json({ error: "Failed to process booking" });
   }
 });
