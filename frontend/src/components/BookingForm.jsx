@@ -25,7 +25,7 @@ const BookingForm = () => {
     setIsSubmitting(true);
 
     try {
-      await axios.post("http://localhost:5000/api/bookings", formData);
+      await axios.post("https://car-rental-ivhr.onrender.com/api/bookings", formData);
       alert("Booking confirmed! The owner has been notified.");
       setFormData({
         name: '',
