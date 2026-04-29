@@ -8,7 +8,7 @@ const bookingRoutes = require("./routes/bookingRoutes");
 const app = express();
 
 // Middleware
-aapp.use(cors({
+app.use(cors({
   origin: function (origin, callback) {
     const allowedOrigins = [
       "http://localhost:5173",
